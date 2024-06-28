@@ -85,18 +85,19 @@ def process_requests(engine: LLMEngine,
             engine.add_request(str(request_id),
                                prompt,
                                sampling_params,
-                               lora_request=lora_request)
+                               lora_request=None)
             request_id += 1
 
         request_outputs: List[RequestOutput] = engine.step()
 
         for request_output in request_outputs:
             if request_output.finished:
-                print(request_output)
+                # print(request_output)
+                pass
     end = time.time()
     print("time spent total " + str(end - start))
 
-def initialize_engine() -> LLMEngine:
+def initialize_engine(enable_lora = False) -> LLMEngine:
     """Initialize the LLMEngine."""
     # max_loras: controls the number of LoRAs that can be used in the same
     #   batch. Larger numbers will cause higher memory usage, as each LoRA
@@ -106,7 +107,7 @@ def initialize_engine() -> LLMEngine:
     #   use the same rank, it is recommended to set this as low as possible.
     # max_cpu_loras: controls the size of the CPU LoRA cache.
     engine_args = EngineArgs(model="meta-llama/Llama-2-7b-hf",
-                             enable_lora=True,
+                             enable_lora=enable_lora,
                              max_loras=1,
                              max_lora_rank=8,
                              max_cpu_loras=2,
@@ -116,8 +117,12 @@ def initialize_engine() -> LLMEngine:
 
 def main():
     """Main function that sets up and runs the prompt processing."""
-    engine = initialize_engine()
+    enable_lora = False
+    engine = initialize_engine(enable_lora=enable_lora)
+    
     lora_path = snapshot_download(repo_id="yard1/llama-2-7b-sql-lora-test")
+    if enable_lora:
+        engine.add_lora(LoRARequest("sql-lora", 1, lora_path))
     test_prompts = create_test_prompts(lora_path)
     process_requests(engine, test_prompts)
 
