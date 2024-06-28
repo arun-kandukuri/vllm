@@ -11,6 +11,7 @@ from huggingface_hub import snapshot_download
 
 from vllm import EngineArgs, LLMEngine, RequestOutput, SamplingParams
 from vllm.lora.request import LoRARequest
+import time
 
 
 def create_test_prompts(
@@ -77,7 +78,7 @@ def process_requests(engine: LLMEngine,
                                               Optional[LoRARequest]]]):
     """Continuously process a list of prompts and handle the outputs."""
     request_id = 0
-
+    start = time.time()
     while test_prompts or engine.has_unfinished_requests():
         if test_prompts:
             prompt, sampling_params, lora_request = test_prompts.pop(0)
@@ -92,7 +93,8 @@ def process_requests(engine: LLMEngine,
         for request_output in request_outputs:
             if request_output.finished:
                 print(request_output)
-
+    end = time.time()
+    print("time spent total " + str(end - start))
 
 def initialize_engine() -> LLMEngine:
     """Initialize the LLMEngine."""
