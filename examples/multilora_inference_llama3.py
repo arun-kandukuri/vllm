@@ -106,7 +106,7 @@ def initialize_engine(enable_lora = False) -> LLMEngine:
     #   numbers will cause higher memory usage. If you know that all LoRAs will
     #   use the same rank, it is recommended to set this as low as possible.
     # max_cpu_loras: controls the size of the CPU LoRA cache.
-    engine_args = EngineArgs(model="meta-llama/Llama-2-7b-hf",
+    engine_args = EngineArgs(model="meta-llama/Meta-Llama-3-8B-Instruct",
                              enable_lora=enable_lora,
                              max_loras=1,
                              max_lora_rank=8,
@@ -116,16 +116,16 @@ def initialize_engine(enable_lora = False) -> LLMEngine:
 
 
 def main():
+    """Main function that sets up and runs the prompt processing."""
     import torch
     torch.cuda.empty_cache()
     import gc
     gc.collect()
     
-    """Main function that sets up and runs the prompt processing."""
     enable_lora = False
     engine = initialize_engine(enable_lora=enable_lora)
     
-    lora_path = snapshot_download(repo_id="yard1/llama-2-7b-sql-lora-test")
+    lora_path = "/home/azureuser/arun/weights/8b-ft/sample1"
     if enable_lora:
         engine.add_lora(LoRARequest("sql-lora", 1, lora_path))
     test_prompts = create_test_prompts(lora_path)
